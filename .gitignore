@@ -1,0 +1,38 @@
+# copied from upstream kate
+
+# general
+/build*/
+*.rej
+*.orig
+*.out
+CMakeLists.txt.user*
+/.clang-format
+/.idea
+
+# kate
+*~
+*-swp
+.kateproject.build
+
+# kdevelop
+*.kdev4
+
+# from kdiff3
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+
+# from dolphin
+.directory
+
+# LSP Server data
+/.clangd
+/.cmake/
+/.cache/
+/compile_commands.json
+/cmake-build*
+.vscode/
+.flatpak/
+.flatpak-builder/
+/_build/
