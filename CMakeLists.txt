@@ -28,7 +28,7 @@ include(FeatureSummary)
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core Gui Widgets)
 
-find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons I18n TextEditor WidgetsAddons)
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons TextEditor WidgetsAddons)
 
 # discord rpc
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

@@ -14,14 +14,30 @@ public:
 
     QObject *createView(KTextEditor::MainWindow *mainWindow) override;
 
+    int configPages() const override
+    {
+        return 1;
+    }
+    KTextEditor::ConfigPage *configPage(int number = 0, QWidget *parent = nullptr) override;
+
+    struct RPCConfig {
+        QString detailsText;
+        QString stateText;
+        bool showElapsedTime;
+    };
+
+    static RPCConfig DefaultConfig;
+
+    RPCConfig *m_config = new RPCConfig();
+    void readConfig();
+    void updateStatus();
+
 private:
     KTextEditor::MainWindow *m_mainWindow;
 
     int64_t m_startTimestamp;
 
     void initDiscord();
-
-    void updateStatus();
 };
 
 #endif
