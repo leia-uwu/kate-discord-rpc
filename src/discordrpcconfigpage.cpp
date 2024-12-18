@@ -73,6 +73,7 @@ void DiscordRpcConfigPage::apply()
 
     config.sync();
     m_plugin->readConfig();
+    m_plugin->updateStatus();
 }
 
 void DiscordRpcConfigPage::reset()

@@ -2,11 +2,14 @@
 #include "discordrpcconfigpage.h"
 
 #include <QDebug>
+#include <QTimer>
 
 #include <KConfigGroup>
 #include <KPluginFactory>
 #include <KSharedConfig>
+#include <KTextEditor/Application>
 #include <KTextEditor/Document>
+#include <KTextEditor/Editor>
 #include <KTextEditor/MainWindow>
 #include <KTextEditor/Plugin>
 #include <KTextEditor/View>
@@ -47,7 +50,12 @@ K_PLUGIN_FACTORY_WITH_JSON(DiscordRpcPluginFactory, "discordrpcplugin.json", reg
 DiscordRpcPlugin::DiscordRpcPlugin(QObject *parent, const QList<QVariant> &)
     : KTextEditor::Plugin(parent)
 {
+    initDiscord();
     readConfig();
+
+    m_updateTimer = new QTimer(this);
+    connect(m_updateTimer, &QTimer::timeout, this, &DiscordRpcPlugin::updateStatus);
+    m_updateTimer->start(5000);
 }
 
 DiscordRpcPlugin::RPCConfig DiscordRpcPlugin::DefaultConfig{
@@ -58,13 +66,15 @@ DiscordRpcPlugin::RPCConfig DiscordRpcPlugin::DefaultConfig{
 
 DiscordRpcPlugin::~DiscordRpcPlugin()
 {
+    m_updateTimer->stop();
     Discord_Shutdown();
 }
 
 QObject *DiscordRpcPlugin::createView(KTextEditor::MainWindow *mainWindow)
 {
-    m_mainWindow = mainWindow;
-    initDiscord();
+    connect(mainWindow, &KTextEditor::MainWindow::viewChanged, this, &DiscordRpcPlugin::updateStatus);
+    updateStatus();
+
     return new QObject(this);
 }
 
@@ -101,26 +111,26 @@ void DiscordRpcPlugin::initDiscord()
     Discord_Initialize(DISCORD_ID, &handlers, 1, nullptr);
 
     m_startTimestamp = QDateTime::currentSecsSinceEpoch();
-
-    updateStatus();
-    connect(m_mainWindow, &KTextEditor::MainWindow::viewChanged, this, &DiscordRpcPlugin::updateStatus);
 }
 
 void DiscordRpcPlugin::updateStatus()
 {
+    auto app = KTextEditor::Editor::instance()->application();
+    auto mainWindow = app->activeMainWindow();
+
     DiscordRichPresence discordPresence;
     memset(&discordPresence, 0, sizeof(discordPresence));
 
     discordPresence.startTimestamp = m_config->showElapsedTime ? m_startTimestamp : 0;
 
     QString fileName = "";
-    KTextEditor::View *view = m_mainWindow->activeView();
+    KTextEditor::View *view = mainWindow->activeView();
     if (view) {
         fileName = view->document()->url().fileName();
     }
 
     QString projectName = "";
-    QObject *projectPlugin = m_mainWindow->pluginView(QStringLiteral("kateprojectplugin"));
+    QObject *projectPlugin = mainWindow->pluginView(QStringLiteral("kateprojectplugin"));
     if (projectPlugin) {
         projectName = projectPlugin->property("projectName").toString();
     }

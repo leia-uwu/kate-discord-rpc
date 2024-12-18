@@ -30,13 +30,13 @@ public:
 
     RPCConfig *m_config = new RPCConfig();
     void readConfig();
+
     void updateStatus();
 
 private:
-    KTextEditor::MainWindow *m_mainWindow;
-
     int64_t m_startTimestamp;
 
+    QTimer *m_updateTimer;
     void initDiscord();
 };
 
