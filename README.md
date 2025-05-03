@@ -25,10 +25,17 @@ to uninstall it simply remove that file
 
 ---
 
+## Arch Linux
+A PKGBUILD is available in the `packaging/arch` directory:
+```bash
+cd packaging/arch
+makepkg -si
+```
+
 ### TODO:
  - [x] Config GUI to format the presence fields
  - [ ] More fields if possible (session name, LSP errors amount, language, etc...)
  - [ ] Idle detection
  - [ ] What to show when the formatted fields only have empty variables
  - [x] Installation instructions
- - [ ] A Pacman PKGBUILD (if someone wants to PR packaging files for other distros feel free)
+ - [x] A Pacman PKGBUILD (if someone wants to PR packaging files for other distros feel free)

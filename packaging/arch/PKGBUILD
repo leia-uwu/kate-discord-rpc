@@ -1,0 +1,63 @@
+# Maintainer: lily <bllryy@proton.me>
+# Website: bllry.com
+
+pkgname=kate-discord-rpc-git
+pkgver=r5.1d790ff
+pkgrel=1
+pkgdesc="Discord RPC Plugin for Kate"
+arch=('x86_64')
+url="https://github.com/leia-uwu/kate-discord-rpc"
+license=('GPL')
+depends=('kate' 'qt6-base' 'kio' 'ktexteditor' 'kcoreaddons' 'ki18n')
+makedepends=('git' 'cmake' 'extra-cmake-modules' 'qt6-tools' 'rapidjson')
+provides=("${pkgname%-git}")
+conflicts=("${pkgname%-git}")
+source=("${pkgname%-git}::git+https://github.com/leia-uwu/kate-discord-rpc.git"
+        "discord-rpc::git+https://github.com/discord/discord-rpc.git")
+sha256sums=('SKIP'
+            'SKIP')
+
+pkgver() {
+    cd "$srcdir/${pkgname%-git}"
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+    cd "$srcdir/${pkgname%-git}"
+
+    # Create the expected discord-rpc subdirectory
+    if [ -d "discord-rpc" ]; then
+        rm -rf discord-rpc
+    fi
+    ln -s "$srcdir/discord-rpc" discord-rpc
+
+    # Fix CMake version in discord-rpc
+    cd "$srcdir/discord-rpc"
+    sed -i 's/cmake_minimum_required.*/cmake_minimum_required(VERSION 3.5)/' CMakeLists.txt
+
+    # Fix duplicate IndentCaseLabels in .clang-format
+    sed -i '48d' .clang-format
+
+    # Use system rapidjson instead of bundled one
+    sed -i '/download_file/d' CMakeLists.txt
+    sed -i 's|include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rapidjson-1.1.0/include)|find_package(RapidJSON REQUIRED)\ninclude_directories(SYSTEM ${RapidJSON_INCLUDE_DIRS})|' CMakeLists.txt
+}
+
+build() {
+    cd "$srcdir/${pkgname%-git}"
+
+    cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTING=OFF \
+        -DCMAKE_POLICY_DEFAULT_CMP0000=OLD \
+        -DCLANG_FORMAT_EXECUTABLE=OFF
+
+    cmake --build build
+}
+
+package() {
+    cd "$srcdir/${pkgname%-git}"
+
+    DESTDIR="$pkgdir" cmake --install build
+}
