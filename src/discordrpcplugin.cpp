@@ -145,6 +145,7 @@ void DiscordRpcPlugin::updateStatus()
     QByteArray state = formatText(m_config->stateText);
     discordPresence.details = details;
     discordPresence.state = state;
+    discordPresence.largeImageKey = "kate";
 
     Discord_UpdatePresence(&discordPresence);
 }
